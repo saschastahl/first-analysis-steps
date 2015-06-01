@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LHCb Starterkit: First Steps in LHCb</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="https://lhcb.github.io/first-analysis-steps/">
+          <img src="img/starterkit.png" height="100" alt="LHCb Starterkit">
+        </a>
+      </div>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+          <h1 class="title">First Steps in LHCb</h1>
+          <h2 class="subtitle">Developing the LHCb Software</h2>
+<div id="learning-objectives" class="objectives panel panel-warning">
+<div class="panel-heading">
+<h2><span class="glyphicon glyphicon-certificate"></span>Learning Objectives</h2>
+</div>
+<div class="panel-body">
+<ul>
+<li>Learn the basics of how to work with and modify LHCb software packages</li>
+</ul>
+</div>
+</div>
+<p>This lesson introduces you to two commands:</p>
+<ul>
+<li><code>lb-dev</code> for setting up a new development environment</li>
+<li><code>getpack</code> for downloading LHCb software packages</li>
+</ul>
+<p>If you want to make changes to a software package, you will need to set up a development environment. <code>lb-dev</code> is your friend here:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">lb-dev</span> --name DaVinciDev DaVinci v36r6</code></pre>
+<!-- This doesn't seem to work atm
+Alternatively, if you want to use the most recent nightly builds:
+
+```bash
+lb-dev --name DaVinciDev --nightly lhcb-head DaVinci
+```
+-->
+<p>The output should look similar to this:</p>
+<pre><code>Successfully created the local project DaVinciDev in .
+
+To start working:
+
+  &gt; cd ./DaVinciDev
+  &gt; getpack MyPackage vXrY
+
+then
+
+  &gt; make
+  &gt; make test
+  &gt; make QMTestSummary
+
+and optionally
+
+  &gt; make install
+
+You can customize the configuration by editing the files &#39;CMakeLists.txt&#39;
+(see http://cern.ch/gaudi/CMake for details).</code></pre>
+<p>Follow those instructions and once you've compiled your software run</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">./run</span> bash</code></pre>
+<p>inside the directory. This will (similar to <code>lb-run</code>) give you a new bash session with the right environment variables.</p>
+<p>Your new development environment won't be very useful without any software to modify and build. So why not check out out one of the existing LHCb packages, which are stored in the LHCb SVN repository?</p>
+<p>Let's assume you have already used <code>lb-dev</code> to set up your development environment and you are currently inside it. In order to obtain the source code of the package you want to work on, use <code>getpack</code>. This is an LHCb-aware wrapper around SVN. For example, if you want to write a custom stripping selection, execute the following in the <code>DaVinciDev</code> directory:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">getpack</span> Phys/StrippingSelection head</code></pre>
+<p>Under the hood, <code>getpack</code> will <code>svn checkout</code> (≈ <code>git clone</code>) the corresponding SVN repository. The first argument to <code>getpack</code> is the name of the package you want to checkout, while the second argument allows you to choose a specific branch. <code>head</code> is usually the one one that contains the newest development changes and he one you should commit new changes to.</p>
+<p>You can now modify the <code>StrippingSelection</code> package and run <code>make</code> to build it with your changes. You can test your changes with the <code>./run</code> script. It works similar to <code>lb-run</code>, without the need to specify a package and version:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">./run</span> gaudirun.py options.py</code></pre>
+<div id="what-if-getpack-asks-for-my-password-1000-times" class="callout panel panel-info">
+<div class="panel-heading">
+<h2><span class="glyphicon glyphicon-pushpin"></span>What if getpack asks for my password 1000 times?</h2>
+</div>
+<div class="panel-body">
+<p><code>getpack</code> might ask you for your password several times. To avoid this, you can create a kerberos token with</p>
+<pre><code>kinit</code></pre>
+<p>You will have to enter your password once, and further password prompts will be skipped</p>
+<p>Alternatively, you can perform an anonymous checkout:</p>
+<pre><code>getpack -p anonymous Phys/StrippingSelection</code></pre>
+</div>
+</div>
+<p>If you have made changes that are supposed to be integrated into the official LHCb repositories, you can use <code>svn commit</code>. Be advised that you should always communicate with the package maintainers before committing changes!</p>
+<p>If you just want to take a look at a source file, without checking it out, you can comfortably access the repository through two different web UIs.</p>
+<ul>
+<li><a href="https://svnweb.cern.ch/trac/lhcb/">Trac</a></li>
+<li><a href="http://svnweb.cern.ch/world/wsvn/lhcb">SVNweb</a></li>
+</ul>
+<p>(which one to use? It is just a matter of taste, pick the one that looks nicest)</p>
+<p>To get an idea of how a certain component of the LHCb software works, you can access its doxygen documentation. There is a page for each project, a list of which can be found here: <a href="https://lhcb-release-area.web.cern.ch/LHCb-release-area/DOC/davinci/latest_doxygen/index.html" class="uri">https://lhcb-release-area.web.cern.ch/LHCb-release-area/DOC/davinci/latest_doxygen/index.html</a>.</p>
+        </div>
+      </div>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/lhcb/first-analysis-steps">Source</a>
+        <a class="label swc-blue-bg" href="mailto:lhcb-starterkit@cern.ch">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>
